@@ -37,7 +37,6 @@ namespace DataCenter
         ComboBox cbCountry;
         Button btnPaste, btnClear, btnExport, btnDelete;
         Label lblStatus;
-        CheckBox chkAll;
 
         public MainForm()
         {
@@ -137,20 +136,14 @@ namespace DataCenter
                 BackgroundColor = Color.White,
                 BorderStyle = BorderStyle.None
             };
-            grid.Columns.Add(new DataGridViewCheckBoxColumn { Name = "Sel", Width = 30, HeaderText = "" });
             grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Number", HeaderText = "号码", MinimumWidth = 120 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Country", HeaderText = "国家", MinimumWidth = 80 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Type", HeaderText = "类型", MinimumWidth = 60 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Channel", HeaderText = "渠道", MinimumWidth = 60 });
             grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Source", HeaderText = "来源", MinimumWidth = 100 });
+            grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            grid.MultiSelect = true;
             split.Panel1.Controls.Add(grid);
-
-            chkAll = new CheckBox { Text = "全选", Left = 8, Top = 6, Width = 50, AutoSize = true };
-            chkAll.CheckedChanged += (s, e) =>
-            {
-                for (int i = 0; i < grid.Rows.Count; i++)
-                    grid.Rows[i].Cells[0].Value = chkAll.Checked;
-            };
 
             var rightPanel = new Panel { Dock = DockStyle.Fill };
             var lblTitle = new Label { Text = "国家汇总", Dock = DockStyle.Top, Height = 30, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Microsoft YaHei", 11f, FontStyle.Bold) };
@@ -168,9 +161,8 @@ namespace DataCenter
             split.Panel2.Controls.Add(rightPanel);
 
             var bottom = new Panel { Dock = DockStyle.Bottom, Height = 34, BackColor = Color.FromArgb(0xF0, 0xF0, 0xF0) };
-            bottom.Controls.Add(chkAll);
 
-            lblStatus = new Label { Left = 70, Top = 8, AutoSize = true, Text = "共 0 条" };
+            lblStatus = new Label { Left = 12, Top = 8, AutoSize = true, Text = "共 0 条" };
             bottom.Controls.Add(lblStatus);
 
             btnDelete = new Button { Text = "删除已选", Left = 200, Top = 5, Width = 80, Height = 24, FlatStyle = FlatStyle.Flat, ForeColor = Color.FromArgb(0xCC, 0x33, 0x33), BackColor = Color.White };
@@ -446,7 +438,7 @@ namespace DataCenter
         {
             grid.Rows.Clear();
             foreach (var r in filtered)
-                grid.Rows.Add(false, r.Number, r.Country, r.Type, r.Channel, r.Source);
+                grid.Rows.Add(r.Number, r.Country, r.Type, r.Channel, r.Source);
             lblStatus.Text = string.Format("共 {0:N0} 条", filtered.Count);
         }
 
@@ -610,13 +602,13 @@ namespace DataCenter
 
         void OnDelete(object sender, EventArgs e)
         {
+            if (grid.SelectedRows.Count == 0) { MessageBox.Show("请先选择要删除的行"); return; }
             var toRemove = new List<Record>();
-            foreach (DataGridViewRow row in grid.Rows)
+            foreach (DataGridViewRow row in grid.SelectedRows)
             {
-                if (row.Cells[0].Value != null && (bool)row.Cells[0].Value && row.Index < filtered.Count)
+                if (row.Index < filtered.Count)
                     toRemove.Add(filtered[row.Index]);
             }
-            if (toRemove.Count == 0) { MessageBox.Show("请先勾选要删除的行"); return; }
             if (MessageBox.Show(string.Format("确认删除 {0} 条?", toRemove.Count), "确认", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
             foreach (var r in toRemove) data.Remove(r);
             SaveData(); RefreshAll();

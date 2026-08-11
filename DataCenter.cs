@@ -11,6 +11,8 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Linq;
 
+using System.Reflection;
+
 namespace DataCenter
 {
     static class Program
@@ -18,9 +20,61 @@ namespace DataCenter
         [STAThread]
         static void Main()
         {
+            // 从嵌入资源释放 SQLite.Interop.dll
+            ExtractInterop();
+            // 注册 AssemblyResolve 加载嵌入的 System.Data.SQLite.dll
+            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
+        }
+
+        static Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            string name = new AssemblyName(args.Name).Name;
+            if (name == "System.Data.SQLite")
+            {
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.SQLite.dll"))
+                {
+                    if (stream != null)
+                    {
+                        byte[] raw = new byte[stream.Length];
+                        stream.Read(raw, 0, raw.Length);
+                        return Assembly.Load(raw);
+                    }
+                }
+            }
+            return null;
+        }
+
+        static void ExtractInterop()
+        {
+            string dir = AppDomain.CurrentDomain.BaseDirectory;
+            string path = Path.Combine(dir, "SQLite.Interop.dll");
+            // 已存在则跳过（避免覆盖）
+            if (File.Exists(path)) return;
+
+            try
+            {
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("SQLite.Interop.dll"))
+                {
+                    if (stream != null)
+                    {
+                        using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write))
+                        {
+                            byte[] buf = new byte[8192];
+                            int n;
+                            while ((n = stream.Read(buf, 0, buf.Length)) > 0)
+                                fs.Write(buf, 0, n);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // 释放失败：依赖外部 DLL，用户需自行放置
+            }
         }
     }
 

@@ -168,270 +168,256 @@ namespace DataCenter
             btnDelete = new Button { Text = "删除已选", Left = 200, Top = 5, Width = 80, Height = 24, FlatStyle = FlatStyle.Flat, ForeColor = Color.FromArgb(0xCC, 0x33, 0x33), BackColor = Color.White };
             btnDelete.Click += OnDelete;
             bottom.Controls.Add(btnDelete);
+
+            Controls.Add(bottom);
         }
 
         string Clean(string s)
         {
             if (string.IsNullOrEmpty(s)) return "";
-            var sb = new StringBuilder(s.Length);
-            foreach (char ch in s)
-                if (ch >= '0' && ch <= '9') { sb.Append(ch); }
-                else if (ch == '+' && sb.Length == 0) { sb.Append(ch); }
-            return sb.ToString();
-        }
-
-        string DetectCountry(string num)
-        {
-            if (string.IsNullOrEmpty(num) || !num.StartsWith("+")) return "未知";
-            if (num.StartsWith("+998")) return "乌兹别克";
-            if (num.StartsWith("+996")) return "吉尔吉斯斯坦";
-            if (num.StartsWith("+995")) return "格鲁吉亚";
-            if (num.StartsWith("+994")) return "阿塞拜疆";
-            if (num.StartsWith("+993")) return "土库曼斯坦";
-            if (num.StartsWith("+992")) return "塔吉克斯坦";
-            if (num.StartsWith("+977")) return "尼泊尔";
-            if (num.StartsWith("+976")) return "蒙古";
-            if (num.StartsWith("+975")) return "不丹";
-            if (num.StartsWith("+974")) return "卡塔尔";
-            if (num.StartsWith("+973")) return "巴林";
-            if (num.StartsWith("+972")) return "以色列";
-            if (num.StartsWith("+971")) return "阿联酋";
-            if (num.StartsWith("+970")) return "巴勒斯坦";
-            if (num.StartsWith("+968")) return "阿曼";
-            if (num.StartsWith("+967")) return "也门";
-            if (num.StartsWith("+966")) return "沙特";
-            if (num.StartsWith("+965")) return "科威特";
-            if (num.StartsWith("+964")) return "伊拉克";
-            if (num.StartsWith("+963")) return "叙利亚";
-            if (num.StartsWith("+962")) return "约旦";
-            if (num.StartsWith("+961")) return "黎巴嫩";
-            if (num.StartsWith("+960")) return "马尔代夫";
-            if (num.StartsWith("+886")) return "台湾";
-            if (num.StartsWith("+880")) return "孟加拉";
-            if (num.StartsWith("+856")) return "老挝";
-            if (num.StartsWith("+855")) return "柬埔寨";
-            if (num.StartsWith("+853")) return "澳门";
-            if (num.StartsWith("+852")) return "香港";
-            if (num.StartsWith("+850")) return "朝鲜";
-            if (num.StartsWith("+692")) return "马绍尔";
-            if (num.StartsWith("+691")) return "密克罗尼西亚";
-            if (num.StartsWith("+690")) return "托克劳";
-            if (num.StartsWith("+689")) return "法属波利尼西亚";
-            if (num.StartsWith("+688")) return "图瓦卢";
-            if (num.StartsWith("+687")) return "新喀里多尼亚";
-            if (num.StartsWith("+686")) return "基里巴斯";
-            if (num.StartsWith("+685")) return "萨摩亚";
-            if (num.StartsWith("+683")) return "纽埃";
-            if (num.StartsWith("+682")) return "库克群岛";
-            if (num.StartsWith("+681")) return "瓦利斯";
-            if (num.StartsWith("+680")) return "帕劳";
-            if (num.StartsWith("+679")) return "斐济";
-            if (num.StartsWith("+678")) return "瓦努阿图";
-            if (num.StartsWith("+677")) return "所罗门";
-            if (num.StartsWith("+676")) return "汤加";
-            if (num.StartsWith("+675")) return "巴布亚新几内亚";
-            if (num.StartsWith("+674")) return "瑙鲁";
-            if (num.StartsWith("+673")) return "文莱";
-            if (num.StartsWith("+672")) return "南极洲";
-            if (num.StartsWith("+670")) return "东帝汶";
-            if (num.StartsWith("+599")) return "荷属安的列斯";
-            if (num.StartsWith("+598")) return "乌拉圭";
-            if (num.StartsWith("+597")) return "苏里南";
-            if (num.StartsWith("+596")) return "马提尼克";
-            if (num.StartsWith("+595")) return "巴拉圭";
-            if (num.StartsWith("+594")) return "法属圭亚那";
-            if (num.StartsWith("+593")) return "厄瓜多尔";
-            if (num.StartsWith("+592")) return "圭亚那";
-            if (num.StartsWith("+591")) return "玻利维亚";
-            if (num.StartsWith("+590")) return "瓜德罗普";
-            if (num.StartsWith("+509")) return "海地";
-            if (num.StartsWith("+508")) return "圣皮埃尔";
-            if (num.StartsWith("+507")) return "巴拿马";
-            if (num.StartsWith("+506")) return "哥斯达黎加";
-            if (num.StartsWith("+505")) return "尼加拉瓜";
-            if (num.StartsWith("+504")) return "洪都拉斯";
-            if (num.StartsWith("+503")) return "萨尔瓦多";
-            if (num.StartsWith("+502")) return "危地马拉";
-            if (num.StartsWith("+501")) return "伯利兹";
-            if (num.StartsWith("+500")) return "福克兰";
-            if (num.StartsWith("+423")) return "列支敦士登";
-            if (num.StartsWith("+421")) return "斯洛伐克";
-            if (num.StartsWith("+420")) return "捷克";
-            if (num.StartsWith("+389")) return "北马其顿";
-            if (num.StartsWith("+387")) return "波黑";
-            if (num.StartsWith("+386")) return "斯洛文尼亚";
-            if (num.StartsWith("+385")) return "克罗地亚";
-            if (num.StartsWith("+383")) return "科索沃";
-            if (num.StartsWith("+382")) return "黑山";
-            if (num.StartsWith("+381")) return "塞尔维亚";
-            if (num.StartsWith("+380")) return "乌克兰";
-            if (num.StartsWith("+378")) return "圣马力诺";
-            if (num.StartsWith("+377")) return "摩纳哥";
-            if (num.StartsWith("+376")) return "安道尔";
-            if (num.StartsWith("+375")) return "白俄罗斯";
-            if (num.StartsWith("+374")) return "亚美尼亚";
-            if (num.StartsWith("+373")) return "摩尔多瓦";
-            if (num.StartsWith("+372")) return "爱沙尼亚";
-            if (num.StartsWith("+371")) return "拉脱维亚";
-            if (num.StartsWith("+370")) return "立陶宛";
-            if (num.StartsWith("+359")) return "保加利亚";
-            if (num.StartsWith("+358")) return "芬兰";
-            if (num.StartsWith("+357")) return "塞浦路斯";
-            if (num.StartsWith("+356")) return "马耳他";
-            if (num.StartsWith("+355")) return "阿尔巴尼亚";
-            if (num.StartsWith("+354")) return "冰岛";
-            if (num.StartsWith("+353")) return "爱尔兰";
-            if (num.StartsWith("+352")) return "卢森堡";
-            if (num.StartsWith("+351")) return "葡萄牙";
-            if (num.StartsWith("+350")) return "直布罗陀";
-            if (num.StartsWith("+299")) return "格陵兰";
-            if (num.StartsWith("+298")) return "法罗群岛";
-            if (num.StartsWith("+297")) return "阿鲁巴";
-            if (num.StartsWith("+291")) return "厄立特里亚";
-            if (num.StartsWith("+290")) return "圣赫勒拿";
-            if (num.StartsWith("+269")) return "科摩罗";
-            if (num.StartsWith("+268")) return "斯威士兰";
-            if (num.StartsWith("+267")) return "博茨瓦纳";
-            if (num.StartsWith("+266")) return "莱索托";
-            if (num.StartsWith("+265")) return "马拉维";
-            if (num.StartsWith("+264")) return "纳米比亚";
-            if (num.StartsWith("+263")) return "津巴布韦";
-            if (num.StartsWith("+262")) return "留尼汪";
-            if (num.StartsWith("+261")) return "马达加斯加";
-            if (num.StartsWith("+260")) return "赞比亚";
-            if (num.StartsWith("+258")) return "莫桑比克";
-            if (num.StartsWith("+257")) return "布隆迪";
-            if (num.StartsWith("+256")) return "乌干达";
-            if (num.StartsWith("+255")) return "坦桑尼亚";
-            if (num.StartsWith("+254")) return "肯尼亚";
-            if (num.StartsWith("+253")) return "吉布提";
-            if (num.StartsWith("+252")) return "索马里";
-            if (num.StartsWith("+251")) return "埃塞俄比亚";
-            if (num.StartsWith("+250")) return "卢旺达";
-            if (num.StartsWith("+249")) return "苏丹";
-            if (num.StartsWith("+248")) return "塞舌尔";
-            if (num.StartsWith("+247")) return "阿森松";
-            if (num.StartsWith("+246")) return "迪戈加西亚";
-            if (num.StartsWith("+245")) return "几内亚比绍";
-            if (num.StartsWith("+244")) return "安哥拉";
-            if (num.StartsWith("+243")) return "刚果金";
-            if (num.StartsWith("+242")) return "刚果布";
-            if (num.StartsWith("+241")) return "加蓬";
-            if (num.StartsWith("+240")) return "赤道几内亚";
-            if (num.StartsWith("+239")) return "圣多美";
-            if (num.StartsWith("+238")) return "佛得角";
-            if (num.StartsWith("+237")) return "喀麦隆";
-            if (num.StartsWith("+236")) return "中非";
-            if (num.StartsWith("+235")) return "乍得";
-            if (num.StartsWith("+234")) return "尼日利亚";
-            if (num.StartsWith("+233")) return "加纳";
-            if (num.StartsWith("+232")) return "塞拉利昂";
-            if (num.StartsWith("+231")) return "利比里亚";
-            if (num.StartsWith("+230")) return "毛里求斯";
-            if (num.StartsWith("+229")) return "贝宁";
-            if (num.StartsWith("+228")) return "多哥";
-            if (num.StartsWith("+227")) return "尼日尔";
-            if (num.StartsWith("+226")) return "布基纳法索";
-            if (num.StartsWith("+225")) return "科特迪瓦";
-            if (num.StartsWith("+224")) return "几内亚";
-            if (num.StartsWith("+223")) return "马里";
-            if (num.StartsWith("+222")) return "毛里塔尼亚";
-            if (num.StartsWith("+221")) return "塞内加尔";
-            if (num.StartsWith("+220")) return "冈比亚";
-            if (num.StartsWith("+218")) return "利比亚";
-            if (num.StartsWith("+216")) return "突尼斯";
-            if (num.StartsWith("+213")) return "阿尔及利亚";
-            if (num.StartsWith("+212")) return "摩洛哥";
-            if (num.StartsWith("+98")) return "伊朗";
-            if (num.StartsWith("+95")) return "缅甸";
-            if (num.StartsWith("+94")) return "斯里兰卡";
-            if (num.StartsWith("+93")) return "阿富汗";
-            if (num.StartsWith("+92")) return "巴基斯坦";
-            if (num.StartsWith("+91")) return "印度";
-            if (num.StartsWith("+90")) return "土耳其";
-            if (num.StartsWith("+86")) return "中国";
-            if (num.StartsWith("+84")) return "越南";
-            if (num.StartsWith("+82")) return "韩国";
-            if (num.StartsWith("+81")) return "日本";
-            if (num.StartsWith("+66")) return "泰国";
-            if (num.StartsWith("+65")) return "新加坡";
-            if (num.StartsWith("+64")) return "新西兰";
-            if (num.StartsWith("+63")) return "菲律宾";
-            if (num.StartsWith("+62")) return "印尼";
-            if (num.StartsWith("+61")) return "澳洲";
-            if (num.StartsWith("+60")) return "马来西亚";
-            if (num.StartsWith("+58")) return "委内瑞拉";
-            if (num.StartsWith("+57")) return "哥伦比亚";
-            if (num.StartsWith("+56")) return "智利";
-            if (num.StartsWith("+55")) return "巴西";
-            if (num.StartsWith("+54")) return "阿根廷";
-            if (num.StartsWith("+53")) return "古巴";
-            if (num.StartsWith("+52")) return "墨西哥";
-            if (num.StartsWith("+51")) return "秘鲁";
-            if (num.StartsWith("+49")) return "德国";
-            if (num.StartsWith("+48")) return "波兰";
-            if (num.StartsWith("+47")) return "挪威";
-            if (num.StartsWith("+46")) return "瑞典";
-            if (num.StartsWith("+45")) return "丹麦";
-            if (num.StartsWith("+44")) return "英国";
-            if (num.StartsWith("+43")) return "奥地利";
-            if (num.StartsWith("+41")) return "瑞士";
-            if (num.StartsWith("+40")) return "罗马尼亚";
-            if (num.StartsWith("+39")) return "意大利";
-            if (num.StartsWith("+36")) return "匈牙利";
-            if (num.StartsWith("+34")) return "西班牙";
-            if (num.StartsWith("+33")) return "法国";
-            if (num.StartsWith("+32")) return "比利时";
-            if (num.StartsWith("+31")) return "荷兰";
-            if (num.StartsWith("+30")) return "希腊";
-            if (num.StartsWith("+27")) return "南非";
-            if (num.StartsWith("+20")) return "埃及";
-            if (num.StartsWith("+7")) return "俄罗斯";
-            if (num.StartsWith("+1")) return "美国/加拿大";
-            return "其他";
-        }
-
-        string AutoDetectType(string num)
-        {
-            if (string.IsNullOrEmpty(num)) return "未知";
-            if (num.StartsWith("+") && !num.StartsWith("+86")) return "国际";
-            if (num.Length >= 11 && num.StartsWith("+86"))
+            var arr = s.Trim().ToCharArray();
+            var result = new char[arr.Length];
+            int j = 0;
+            for (int i = 0; i < arr.Length; i++)
             {
-                var mobile = num.Length >= 13 ? num.Substring(3) : num;
-                if (mobile.Length == 11 && mobile[0] == '1' && mobile[1] >= '3' && mobile[1] <= '9')
-                    return "手机";
-                return "固话";
+                if (arr[i] >= '0' && arr[i] <= '9') { result[j++] = arr[i]; continue; }
             }
-            if (num.Length == 11 && num[0] == '1' && num[1] >= '3' && num[1] <= '9') return "手机";
-            if (num.Length >= 10 && num[0] == '0') return "固话";
+            if (j == 0) return "";
+            var num = new string(result, 0, j);
+            // deduplicate repeating patterns (12345-12345 → 12345)
+            int len = num.Length;
+            if (len >= 4 && len % 2 == 0)
+            {
+                int half = len / 2;
+                if (num.Substring(0, half) == num.Substring(half, half))
+                    num = num.Substring(0, half);
+            }
+            return num;
+        }
+
+        bool IsDigits(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return false;
+            for (int i = 0; i < s.Length; i++)
+                if (s[i] < '0' || s[i] > '9') return false;
+            return true;
+        }
+
+        string DetectCountry(string n)
+        {
+            if (string.IsNullOrEmpty(n)) return "未知";
+            if (n.StartsWith("852")) return "香港";
+            if (n.StartsWith("853")) return "澳门";
+            if (n.StartsWith("886")) return "台湾";
+            if (n.StartsWith("86")) return "中国";
+            if (n.StartsWith("7")) return "俄罗斯";
+            if (n.StartsWith("1")) return "美国/加拿大";
+            if (n.StartsWith("81")) return "日本";
+            if (n.StartsWith("82")) return "韩国";
+            if (n.StartsWith("84")) return "越南";
+            if (n.StartsWith("65")) return "新加坡";
+            if (n.StartsWith("60")) return "马来西亚";
+            if (n.StartsWith("66")) return "泰国";
+            if (n.StartsWith("62")) return "印尼";
+            if (n.StartsWith("63")) return "菲律宾";
+            if (n.StartsWith("91")) return "印度";
+            if (n.StartsWith("92")) return "巴基斯坦";
+            if (n.StartsWith("90")) return "土耳其";
+            if (n.StartsWith("98")) return "伊朗";
+            if (n.StartsWith("95")) return "缅甸";
+            if (n.StartsWith("94")) return "斯里兰卡";
+            if (n.StartsWith("93")) return "阿富汗";
+            if (n.StartsWith("880")) return "孟加拉";
+            if (n.StartsWith("855")) return "柬埔寨";
+            if (n.StartsWith("856")) return "老挝";
+            if (n.StartsWith("20")) return "埃及";
+            if (n.StartsWith("27")) return "南非";
+            if (n.StartsWith("234")) return "尼日利亚";
+            if (n.StartsWith("254")) return "肯尼亚";
+            if (n.StartsWith("30")) return "希腊";
+            if (n.StartsWith("31")) return "荷兰";
+            if (n.StartsWith("32")) return "比利时";
+            if (n.StartsWith("33")) return "法国";
+            if (n.StartsWith("34")) return "西班牙";
+            if (n.StartsWith("36")) return "匈牙利";
+            if (n.StartsWith("39")) return "意大利";
+            if (n.StartsWith("40")) return "罗马尼亚";
+            if (n.StartsWith("41")) return "瑞士";
+            if (n.StartsWith("43")) return "奥地利";
+            if (n.StartsWith("44")) return "英国";
+            if (n.StartsWith("45")) return "丹麦";
+            if (n.StartsWith("46")) return "瑞典";
+            if (n.StartsWith("47")) return "挪威";
+            if (n.StartsWith("48")) return "波兰";
+            if (n.StartsWith("49")) return "德国";
+            if (n.StartsWith("51")) return "秘鲁";
+            if (n.StartsWith("52")) return "墨西哥";
+            if (n.StartsWith("53")) return "古巴";
+            if (n.StartsWith("54")) return "阿根廷";
+            if (n.StartsWith("55")) return "巴西";
+            if (n.StartsWith("56")) return "智利";
+            if (n.StartsWith("57")) return "哥伦比亚";
+            if (n.StartsWith("58")) return "委内瑞拉";
+            if (n.StartsWith("61")) return "澳大利亚";
+            if (n.StartsWith("64")) return "新西兰";
+            if (n.StartsWith("355")) return "阿尔巴尼亚";
+            if (n.StartsWith("213")) return "阿尔及利亚";
+            if (n.StartsWith("376")) return "安道尔";
+            if (n.StartsWith("244")) return "安哥拉";
+            if (n.StartsWith("374")) return "亚美尼亚";
+            if (n.StartsWith("297")) return "阿鲁巴";
+            if (n.StartsWith("994")) return "阿塞拜疆";
+            if (n.StartsWith("973")) return "巴林";
+            if (n.StartsWith("375")) return "白俄罗斯";
+            if (n.StartsWith("501")) return "伯利兹";
+            if (n.StartsWith("229")) return "贝宁";
+            if (n.StartsWith("975")) return "不丹";
+            if (n.StartsWith("591")) return "玻利维亚";
+            if (n.StartsWith("387")) return "波黑";
+            if (n.StartsWith("267")) return "博茨瓦纳";
+            if (n.StartsWith("673")) return "文莱";
+            if (n.StartsWith("359")) return "保加利亚";
+            if (n.StartsWith("226")) return "布基纳法索";
+            if (n.StartsWith("257")) return "布隆迪";
+            if (n.StartsWith("855")) return "柬埔寨";
+            if (n.StartsWith("237")) return "喀麦隆";
+            if (n.StartsWith("235")) return "乍得";
+            if (n.StartsWith("269")) return "科摩罗";
+            if (n.StartsWith("242")) return "刚果";
+            if (n.StartsWith("506")) return "哥斯达黎加";
+            if (n.StartsWith("225")) return "科特迪瓦";
+            if (n.StartsWith("385")) return "克罗地亚";
+            if (n.StartsWith("357")) return "塞浦路斯";
+            if (n.StartsWith("420")) return "捷克";
+            if (n.StartsWith("253")) return "吉布提";
+            if (n.StartsWith("593")) return "厄瓜多尔";
+            if (n.StartsWith("503")) return "萨尔瓦多";
+            if (n.StartsWith("240")) return "赤道几内亚";
+            if (n.StartsWith("291")) return "厄立特里亚";
+            if (n.StartsWith("372")) return "爱沙尼亚";
+            if (n.StartsWith("251")) return "埃塞俄比亚";
+            if (n.StartsWith("679")) return "斐济";
+            if (n.StartsWith("358")) return "芬兰";
+            if (n.StartsWith("241")) return "加蓬";
+            if (n.StartsWith("220")) return "冈比亚";
+            if (n.StartsWith("995")) return "格鲁吉亚";
+            if (n.StartsWith("233")) return "加纳";
+            if (n.StartsWith("502")) return "危地马拉";
+            if (n.StartsWith("224")) return "几内亚";
+            if (n.StartsWith("592")) return "圭亚那";
+            if (n.StartsWith("509")) return "海地";
+            if (n.StartsWith("504")) return "洪都拉斯";
+            if (n.StartsWith("354")) return "冰岛";
+            if (n.StartsWith("964")) return "伊拉克";
+            if (n.StartsWith("353")) return "爱尔兰";
+            if (n.StartsWith("972")) return "以色列";
+            if (n.StartsWith("962")) return "约旦";
+            if (n.StartsWith("7")) return "哈萨克斯坦";
+            if (n.StartsWith("686")) return "基里巴斯";
+            if (n.StartsWith("965")) return "科威特";
+            if (n.StartsWith("996")) return "吉尔吉斯斯坦";
+            if (n.StartsWith("371")) return "拉脱维亚";
+            if (n.StartsWith("961")) return "黎巴嫩";
+            if (n.StartsWith("266")) return "莱索托";
+            if (n.StartsWith("231")) return "利比里亚";
+            if (n.StartsWith("218")) return "利比亚";
+            if (n.StartsWith("423")) return "列支敦士登";
+            if (n.StartsWith("370")) return "立陶宛";
+            if (n.StartsWith("352")) return "卢森堡";
+            if (n.StartsWith("389")) return "马其顿";
+            if (n.StartsWith("261")) return "马达加斯加";
+            if (n.StartsWith("265")) return "马拉维";
+            if (n.StartsWith("960")) return "马尔代夫";
+            if (n.StartsWith("223")) return "马里";
+            if (n.StartsWith("356")) return "马耳他";
+            if (n.StartsWith("222")) return "毛里塔尼亚";
+            if (n.StartsWith("230")) return "毛里求斯";
+            if (n.StartsWith("373")) return "摩尔多瓦";
+            if (n.StartsWith("377")) return "摩纳哥";
+            if (n.StartsWith("976")) return "蒙古";
+            if (n.StartsWith("382")) return "黑山";
+            if (n.StartsWith("212")) return "摩洛哥";
+            if (n.StartsWith("258")) return "莫桑比克";
+            if (n.StartsWith("264")) return "纳米比亚";
+            if (n.StartsWith("977")) return "尼泊尔";
+            if (n.StartsWith("505")) return "尼加拉瓜";
+            if (n.StartsWith("227")) return "尼日尔";
+            if (n.StartsWith("968")) return "阿曼";
+            if (n.StartsWith("507")) return "巴拿马";
+            if (n.StartsWith("675")) return "巴布亚新几内亚";
+            if (n.StartsWith("595")) return "巴拉圭";
+            if (n.StartsWith("351")) return "葡萄牙";
+            if (n.StartsWith("974")) return "卡塔尔";
+            if (n.StartsWith("7")) return "俄罗斯";
+            if (n.StartsWith("250")) return "卢旺达";
+            if (n.StartsWith("966")) return "沙特阿拉伯";
+            if (n.StartsWith("221")) return "塞内加尔";
+            if (n.StartsWith("381")) return "塞尔维亚";
+            if (n.StartsWith("232")) return "塞拉利昂";
+            if (n.StartsWith("421")) return "斯洛伐克";
+            if (n.StartsWith("386")) return "斯洛文尼亚";
+            if (n.StartsWith("252")) return "索马里";
+            if (n.StartsWith("211")) return "南苏丹";
+            if (n.StartsWith("249")) return "苏丹";
+            if (n.StartsWith("597")) return "苏里南";
+            if (n.StartsWith("268")) return "斯威士兰";
+            if (n.StartsWith("963")) return "叙利亚";
+            if (n.StartsWith("992")) return "塔吉克斯坦";
+            if (n.StartsWith("255")) return "坦桑尼亚";
+            if (n.StartsWith("228")) return "多哥";
+            if (n.StartsWith("216")) return "突尼斯";
+            if (n.StartsWith("256")) return "乌干达";
+            if (n.StartsWith("380")) return "乌克兰";
+            if (n.StartsWith("971")) return "阿联酋";
+            if (n.StartsWith("598")) return "乌拉圭";
+            if (n.StartsWith("998")) return "乌兹别克斯坦";
+            if (n.StartsWith("678")) return "瓦努阿图";
+            if (n.StartsWith("967")) return "也门";
+            if (n.StartsWith("260")) return "赞比亚";
+            if (n.StartsWith("263")) return "津巴布韦";
+            return "未知";
+        }
+
+        string AutoDetectType(string n)
+        {
+            if (string.IsNullOrEmpty(n)) return "未知";
+            if (!n.StartsWith("86") && n.Length > 2) return "国际";
+            if (n.StartsWith("86")) n = n.Substring(2);
+            if (n.Length >= 11 && n[0] == '1' && n[1] >= '3' && n[1] <= '9') return "手机";
+            if (n.Length >= 10 && n[0] == '0' && n[1] >= '1') return "固话";
             return "未知";
         }
 
         void RefreshAll()
         {
-            ApplyFilter();
+            RefreshGrid();
+            RefreshTree();
+            UpdateStatus();
+            PopulateCountryCombo();
         }
 
         void ApplyFilter()
         {
             var search = (txtSearch.Text ?? "").Trim().ToLower();
-            var country = cbCountry.SelectedItem as string;
-            if (country == "全部") country = null;
+            var country = cbCountry.SelectedItem != null ? (string)cbCountry.SelectedItem : "";
 
             filtered = data.Where(r =>
             {
-                if (country != null && r.Country != country) return false;
+                if (!string.IsNullOrEmpty(country) && r.Country != country) return false;
                 if (!string.IsNullOrEmpty(search))
                 {
-                    return r.Number.ToLower().Contains(search) ||
-                           r.Country.ToLower().Contains(search) ||
-                           r.Type.ToLower().Contains(search) ||
-                           r.Channel.ToLower().Contains(search);
+                    if (r.Number.ToLower().Contains(search)) return true;
+                    if (r.Country.ToLower().Contains(search)) return true;
+                    if (r.Type.ToLower().Contains(search)) return true;
+                    if (r.Channel.ToLower().Contains(search)) return true;
+                    return false;
                 }
                 return true;
             }).ToList();
+
             RefreshGrid();
             RefreshTree();
+            UpdateStatus();
         }
 
         void RefreshGrid()
@@ -439,62 +425,71 @@ namespace DataCenter
             grid.Rows.Clear();
             foreach (var r in filtered)
                 grid.Rows.Add(r.Number, r.Country, r.Type, r.Channel, r.Source);
-            lblStatus.Text = string.Format("共 {0:N0} 条", filtered.Count);
         }
 
         void RefreshTree()
         {
             tree.Nodes.Clear();
-            var byCountry = data.GroupBy(r => r.Country)
-                .OrderByDescending(g => g.Count());
-            var allCountryNames = byCountry.Select(g => g.Key).ToList();
-            allCountryNames.Insert(0, "全部");
-            cbCountry.Items.Clear();
-            foreach (var name in allCountryNames)
-                cbCountry.Items.Add(name);
-            if (cbCountry.Items.Count > 0) cbCountry.SelectedIndex = 0;
-
-            foreach (var g in byCountry)
+            var groups = filtered
+                .GroupBy(r => r.Country)
+                .OrderBy(g => g.Count() == 0 ? 0 : -g.Count());
+            foreach (var cg in groups)
             {
-                var countryNode = new TreeNode(string.Format("{0} ({1:N0})", g.Key, g.Count()));
-                countryNode.ForeColor = Color.FromArgb(0x00, 0x70, 0xC0);
-                countryNode.NodeFont = new Font(tree.Font, FontStyle.Bold);
-                var byType = g.GroupBy(r => r.Type).OrderByDescending(t => t.Count());
-                foreach (var t in byType)
+                var countryNode = new TreeNode(string.Format("{0} ({1})", cg.Key, cg.Count()));
+                var types = cg.GroupBy(r => r.Type).OrderBy(g => -g.Count());
+                foreach (var tg in types)
                 {
-                    var typeNode = new TreeNode(string.Format("{0} ({1:N0})", t.Key, t.Count()));
-                    typeNode.ForeColor = Color.FromArgb(0x33, 0x33, 0x33);
-                    var byChannel = t.GroupBy(r => r.Channel).OrderByDescending(c => c.Count());
-                    foreach (var ch in byChannel)
-                    {
-                        var chNode = new TreeNode(string.Format("{0} ({1:N0})", ch.Key, ch.Count()));
-                        chNode.ForeColor = Color.FromArgb(0x66, 0x66, 0x66);
-                        typeNode.Nodes.Add(chNode);
-                    }
+                    var typeNode = new TreeNode(string.Format("{0} ({1})", tg.Key, tg.Count()));
+                    var channels = tg.GroupBy(r => r.Channel).OrderBy(g => -g.Count());
+                    foreach (var chg in channels)
+                        typeNode.Nodes.Add(string.Format("{0} ({1})", chg.Key, chg.Count()));
                     countryNode.Nodes.Add(typeNode);
                 }
                 tree.Nodes.Add(countryNode);
             }
-            if (tree.Nodes.Count > 0) tree.Nodes[0].Expand();
+            if (tree.Nodes.Count > 0)
+            {
+                tree.Nodes[0].Expand();
+                if (tree.Nodes[0].Nodes.Count > 0)
+                    tree.Nodes[0].Nodes[0].Expand();
+            }
+        }
+
+        void UpdateStatus()
+        {
+            lblStatus.Text = string.Format("共 {0} 条  |  显示 {1} 条  |  已选 {2} 条", data.Count, filtered.Count, grid.SelectedRows.Count);
+        }
+
+        void PopulateCountryCombo()
+        {
+            var current = cbCountry.SelectedItem != null ? (string)cbCountry.SelectedItem : "";
+            cbCountry.Items.Clear();
+            cbCountry.Items.Add("");
+            foreach (var c in data.Select(r => r.Country).Distinct().OrderBy(s => s))
+                cbCountry.Items.Add(c);
+            if (cbCountry.Items.Contains(current))
+                cbCountry.SelectedItem = current;
+            else
+                cbCountry.SelectedIndex = 0;
         }
 
         void OnImport(object sender, EventArgs e)
         {
             var dlg = new OpenFileDialog
             {
-                Filter = "文本文件|*.txt;*.csv|Excel文件|*.xlsx|所有文件|*.*",
-                Multiselect = true
+                Filter = "文本文件|*.txt;*.csv",
+                Multiselect = true,
+                Title = "选择数据文件（TXT / CSV）"
             };
             if (dlg.ShowDialog() != DialogResult.OK) return;
-            int added = 0;
+            int total = 0;
             foreach (var path in dlg.FileNames)
             {
-                var source = Path.GetFileNameWithoutExtension(path);
                 var nums = ReadFile(path);
-                added += ImportNumbers(nums, source);
+                total += ImportNumbers(nums, Path.GetFileName(path));
             }
-            if (added > 0) { SaveData(); RefreshAll(); }
-            MessageBox.Show(string.Format("成功导入 {0} 条", added), "导入完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            SaveData(); RefreshAll();
+            MessageBox.Show(string.Format("成功导入 {0} 条", total), "导入完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         void OnPaste(object sender, EventArgs e)
@@ -545,43 +540,11 @@ namespace DataCenter
             var nums = new List<string>();
             try
             {
-                var ext = Path.GetExtension(path).ToLower();
-                if (ext == ".xlsx") return ReadXlsx(path);
                 foreach (var line in File.ReadAllLines(path, DetectEncoding(path)))
                 {
                     if (string.IsNullOrWhiteSpace(line)) continue;
                     var n = Clean(line);
                     if (!string.IsNullOrEmpty(n)) nums.Add(n);
-                }
-            }
-            catch { }
-            return nums;
-        }
-
-        List<string> ReadXlsx(string path)
-        {
-            var nums = new List<string>();
-            try
-            {
-                var bytes = File.ReadAllBytes(path);
-                using (var ms = new MemoryStream(bytes))
-                using (var pkg = System.IO.Packaging.Package.Open(ms))
-                {
-                    var uri = new Uri("/xl/sharedStrings.xml", UriKind.Relative);
-                    var part = pkg.GetPart(uri);
-                    var xml = "";
-                    using (var sr = new StreamReader(part.GetStream()))
-                        xml = sr.ReadToEnd();
-                    int idx = 0;
-                    while ((idx = xml.IndexOf("<t>", idx)) >= 0)
-                    {
-                        var end = xml.IndexOf("</t>", idx);
-                        if (end < 0) break;
-                        var val = xml.Substring(idx + 3, end - idx - 3);
-                        var n = Clean(val);
-                        if (!string.IsNullOrEmpty(n)) nums.Add(n);
-                        idx = end + 4;
-                    }
                 }
             }
             catch { }

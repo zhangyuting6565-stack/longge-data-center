@@ -34,20 +34,20 @@ namespace DataCenter
 
         // ── UI 控件 ──
         DataGridView grid;
-        Label lStat;
+        Label lStat, lSummary;
         TextBox tbSearch;
-        ComboBox cbCountry;
-        Button bImport, bPaste, bExport, bClear, bDel, bRefresh;
-        Panel topPanel;
+        ComboBox cbCountry, cbType, cbChannel;
+        Button bImport, bPaste, bExport, bClear, bDel, bRefresh, bSetType, bSetChannel;
+        Panel topPanel, rightPanel;
 
         public MainForm()
         {
             Text = "龙哥数据中心";
-            Size = new Size(1100, 700);
+            Size = new Size(1300, 750);
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = Color.FromArgb(0x1a, 0x1a, 0x1a);
             ForeColor = Color.White;
-            MinimumSize = new Size(800, 500);
+            MinimumSize = new Size(1000, 550);
 
             // 数据库路径: exe 同目录
             dbPath = Path.Combine(Application.StartupPath, "data.db");
@@ -68,17 +68,25 @@ namespace DataCenter
                     id      INTEGER PRIMARY KEY AUTOINCREMENT,
                     number  TEXT NOT NULL UNIQUE,
                     country TEXT,
+                    type    TEXT DEFAULT '',
+                    channel TEXT DEFAULT '短信',
                     prefix  TEXT,
                     source  TEXT,
                     added   TEXT DEFAULT (datetime('now','localtime'))
                 );
                 CREATE INDEX IF NOT EXISTS idx_country ON numbers(country);
+                CREATE INDEX IF NOT EXISTS idx_type   ON numbers(type);
+                CREATE INDEX IF NOT EXISTS idx_channel ON numbers(channel);
                 CREATE INDEX IF NOT EXISTS idx_prefix  ON numbers(prefix);
                 CREATE INDEX IF NOT EXISTS idx_added   ON numbers(added);
             ", db))
             {
                 cmd.ExecuteNonQuery();
             }
+
+            // 迁移: 旧库添加 type/channel 列
+            try { ExecSQL("ALTER TABLE numbers ADD COLUMN type TEXT DEFAULT ''"); } catch { }
+            try { ExecSQL("ALTER TABLE numbers ADD COLUMN channel TEXT DEFAULT '短信'"); } catch { }
         }
 
         void ExecSQL(string sql)
@@ -108,44 +116,83 @@ namespace DataCenter
         void BuildUI()
         {
             // 顶部面板
-            topPanel = new Panel { Dock = DockStyle.Top, Height = 70, BackColor = Color.FromArgb(0x22, 0x22, 0x22) };
+            topPanel = new Panel { Dock = DockStyle.Top, Height = 90, BackColor = Color.FromArgb(0x22, 0x22, 0x22) };
             Controls.Add(topPanel);
 
-            int y = 12;
+            int y1 = 8;
 
             // 导入按钮
-            bImport = Btn("导入文件", 12, y, 85, 30, OnImportFile);
-            bPaste = Btn("粘贴导入", 102, y, 85, 30, OnPasteImport);
-            bClear = Btn("清空库", 192, y, 75, 30, OnClearAll);
+            bImport = Btn("导入文件", 10, y1, 85, 28, OnImportFile);
+            bPaste = Btn("粘贴导入", 100, y1, 85, 28, OnPasteImport);
+            bClear = Btn("清空库", 190, y1, 75, 28, OnClearAll);
 
             // 搜索控件
-            cbCountry = new ComboBox { Left = 290, Top = y + 2, Width = 110, DropDownStyle = ComboBoxStyle.DropDownList, FlatStyle = FlatStyle.Flat };
+            cbCountry = new ComboBox { Left = 280, Top = y1 + 1, Width = 100, DropDownStyle = ComboBoxStyle.DropDownList, FlatStyle = FlatStyle.Flat, Font = new Font("Microsoft YaHei", 9) };
             cbCountry.BackColor = Color.FromArgb(0x33, 0x33, 0x33);
             cbCountry.ForeColor = Color.White;
             LoadCountries();
             topPanel.Controls.Add(cbCountry);
 
-            tbSearch = new TextBox { Left = 410, Top = y + 2, Width = 160 };
+            cbType = new ComboBox { Left = 388, Top = y1 + 1, Width = 88, DropDownStyle = ComboBoxStyle.DropDownList, FlatStyle = FlatStyle.Flat, Font = new Font("Microsoft YaHei", 9) };
+            cbType.BackColor = Color.FromArgb(0x33, 0x33, 0x33);
+            cbType.ForeColor = Color.White;
+            LoadTypes();
+            topPanel.Controls.Add(cbType);
+
+            cbChannel = new ComboBox { Left = 484, Top = y1 + 1, Width = 88, DropDownStyle = ComboBoxStyle.DropDown, FlatStyle = FlatStyle.Flat, Font = new Font("Microsoft YaHei", 9) };
+            cbChannel.BackColor = Color.FromArgb(0x33, 0x33, 0x33);
+            cbChannel.ForeColor = Color.White;
+            cbChannel.Items.AddRange(new object[] { "短信", "WS", "TG", "RCS", "iOS群发专用" });
+            cbChannel.Text = "短信";
+            topPanel.Controls.Add(cbChannel);
+
+            tbSearch = new TextBox { Left = 580, Top = y1 + 1, Width = 130, Font = new Font("Microsoft YaHei", 9) };
             tbSearch.BackColor = Color.FromArgb(0x33, 0x33, 0x33);
             tbSearch.ForeColor = Color.White;
             tbSearch.BorderStyle = BorderStyle.FixedSingle;
             topPanel.Controls.Add(tbSearch);
 
-            var bSearch = Btn("搜索", 580, y, 60, 30, OnSearch);
+            var bSearch = Btn("搜索", 718, y1, 60, 28, OnSearch);
 
-            // 右侧按钮
-            bRefresh = Btn("刷新", 660, y, 60, 30, (s, e) => RefreshAll());
-            bDel = Btn("删选中", 730, y, 65, 30, OnDeleteSelected);
-            bExport = Btn("导出结果", 805, y, 85, 30, OnExportResult);
+            // 第一行右侧按钮
+            bRefresh = Btn("刷新", 788, y1, 60, 28, (s, e) => RefreshAll());
+            bExport = Btn("导出", 856, y1, 60, 28, OnExportResult);
+            bDel = Btn("删选中", 924, y1, 70, 28, OnDeleteSelected);
+
+            // 第二行: 批量操作
+            int y2 = 44;
+            var l = new Label { Text = "选中行批量:", Left = 10, Top = y2 + 5, AutoSize = true, ForeColor = Color.FromArgb(0x88, 0x88, 0x88), Font = new Font("Microsoft YaHei", 9) };
+            topPanel.Controls.Add(l);
+
+            bSetType = Btn("改类型", 90, y2, 75, 26, OnBatchSetType);
+            bSetChannel = Btn("改渠道", 172, y2, 75, 26, OnBatchSetChannel);
 
             // 统计标签
             lStat = new Label
             {
-                Left = 12, Top = 48, AutoSize = true,
+                Left = 260, Top = y2 + 5, AutoSize = true,
                 ForeColor = Color.FromArgb(0x88, 0x88, 0x88),
-                Text = "共 0 条"
+                Text = "共 0 条", Font = new Font("Microsoft YaHei", 9)
             };
             topPanel.Controls.Add(lStat);
+
+            // 右侧汇总面板
+            rightPanel = new Panel
+            {
+                Dock = DockStyle.Right,
+                Width = 280,
+                BackColor = Color.FromArgb(0x22, 0x22, 0x22),
+                Padding = new Padding(8)
+            };
+            lSummary = new Label
+            {
+                Dock = DockStyle.Fill,
+                ForeColor = Color.White,
+                Font = new Font("Microsoft YaHei", 9),
+                Text = "加载中…"
+            };
+            rightPanel.Controls.Add(lSummary);
+            Controls.Add(rightPanel);
 
             // 数据表格
             grid = new DataGridView
@@ -173,10 +220,20 @@ namespace DataCenter
             grid.DefaultCellStyle.Font = new Font("Consolas", 10);
             grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(0x33, 0x66, 0x99);
             grid.Columns.Add("col_id", "ID");
-            grid.Columns["col_id"].Width = 60;
+            grid.Columns["col_id"].Width = 55;
             grid.Columns["col_id"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             grid.Columns.Add("col_number", "号码");
+            grid.Columns["col_number"].Width = 140;
+            grid.Columns["col_number"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             grid.Columns.Add("col_country", "国家");
+            grid.Columns["col_country"].Width = 80;
+            grid.Columns["col_country"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            grid.Columns.Add("col_type", "类型");
+            grid.Columns["col_type"].Width = 65;
+            grid.Columns["col_type"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            grid.Columns.Add("col_channel", "渠道");
+            grid.Columns["col_channel"].Width = 65;
+            grid.Columns["col_channel"].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             grid.Columns.Add("col_prefix", "前缀");
             grid.Columns.Add("col_source", "来源");
             grid.Columns.Add("col_added", "时间");
@@ -215,6 +272,94 @@ namespace DataCenter
             }
             catch { }
             cbCountry.SelectedIndex = 0;
+        }
+
+        // ═══════════════════════════════════════════════
+        // 类型列表 (自动从库中收集 + 预设)
+        // ═══════════════════════════════════════════════
+        void LoadTypes()
+        {
+            cbType.Items.Clear();
+            cbType.Items.Add("-- 全部类型 --");
+            try
+            {
+                var dt = QuerySQL("SELECT DISTINCT type FROM numbers WHERE type IS NOT NULL AND type != '' ORDER BY type");
+                foreach (DataRow row in dt.Rows)
+                    cbType.Items.Add(row[0].ToString());
+            }
+            catch { }
+            cbType.SelectedIndex = 0;
+        }
+
+        // ═══════════════════════════════════════════════
+        // 号码类型自动检测
+        // ═══════════════════════════════════════════════
+        static string AutoDetectType(string num)
+        {
+            if (string.IsNullOrEmpty(num)) return "";
+            // 11位 1[3-9] → 手机
+            if (num.Length == 11 && num[0] == '1' && num[1] >= '3' && num[1] <= '9')
+                return "手机";
+            // 0开头 ≥10位 → 固话
+            if (num.StartsWith("0") && num.Length >= 10)
+                return "固话";
+            // + / 00 开头 → 国际
+            if (num.StartsWith("+") || num.StartsWith("00"))
+                return "国际";
+            // 10-12位 非0/1开头 → 国际
+            if (num.Length >= 8 && num.Length <= 15)
+            {
+                char first = num[0];
+                if (first != '0' && first != '1' && num.StartsWith("86") == false)
+                    return "国际";
+            }
+            return "其他";
+        }
+
+        // ═══════════════════════════════════════════════
+        // 汇总面板
+        // ═══════════════════════════════════════════════
+        void RefreshSummary()
+        {
+            try
+            {
+                var sb = new StringBuilder();
+
+                // 标题
+                sb.AppendLine("◆ 数据中心汇总");
+                sb.AppendLine();
+
+                // 总计
+                long total = Convert.ToInt64(ScalarSQL("SELECT COUNT(*) FROM numbers"));
+                sb.AppendLine(string.Format("总计: {0:n0} 条", total));
+                sb.AppendLine();
+
+                // 按国家
+                sb.AppendLine("── 按国家 ──");
+                var dtC = QuerySQL("SELECT country, COUNT(*) cnt FROM numbers WHERE country IS NOT NULL AND country != '' GROUP BY country ORDER BY cnt DESC LIMIT 20");
+                foreach (DataRow row in dtC.Rows)
+                    sb.AppendLine(string.Format("  {0}: {1}", row["country"], row["cnt"]));
+                sb.AppendLine();
+
+                // 按类型
+                sb.AppendLine("── 按类型 ──");
+                var dtT = QuerySQL("SELECT type, COUNT(*) cnt FROM numbers WHERE type IS NOT NULL AND type != '' GROUP BY type ORDER BY cnt DESC");
+                foreach (DataRow row in dtT.Rows)
+                    sb.AppendLine(string.Format("  {0}: {1}", row["type"], row["cnt"]));
+                sb.AppendLine();
+
+                // 按渠道
+                sb.AppendLine("── 按渠道 ──");
+                var dtCh = QuerySQL("SELECT channel, COUNT(*) cnt FROM numbers WHERE channel IS NOT NULL AND channel != '' GROUP BY channel ORDER BY cnt DESC");
+                foreach (DataRow row in dtCh.Rows)
+                    sb.AppendLine(string.Format("  {0}: {1}", row["channel"], row["cnt"]));
+
+                lSummary.Text = sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                lSummary.Text = "汇总加载失败: " + ex.Message;
+            }
         }
 
         // ═══════════════════════════════════════════════
@@ -334,7 +479,7 @@ namespace DataCenter
         // ═══════════════════════════════════════════════
         // 导入 ── 从 List<string> 批量插入
         // ═══════════════════════════════════════════════
-        int ImportNumbers(List<string> numbers, string source)
+        int ImportNumbers(List<string> numbers, string source, string channel)
         {
             if (numbers.Count == 0) return 0;
             int inserted = 0;
@@ -342,19 +487,24 @@ namespace DataCenter
             using (var trans = db.BeginTransaction())
             {
                 using (var cmd = new SQLiteCommand(
-                    "INSERT OR IGNORE INTO numbers (number, country, prefix, source) VALUES (@n, @c, @p, @s)", db))
+                    "INSERT OR IGNORE INTO numbers (number, country, type, channel, prefix, source) VALUES (@n, @c, @t, @ch, @p, @s)", db))
                 {
                     cmd.Parameters.Add("@n", DbType.String);
                     cmd.Parameters.Add("@c", DbType.String);
+                    cmd.Parameters.Add("@t", DbType.String);
+                    cmd.Parameters.Add("@ch", DbType.String);
                     cmd.Parameters.Add("@p", DbType.String);
                     cmd.Parameters.Add("@s", DbType.String);
 
                     foreach (var num in numbers)
                     {
                         string country = DetectCountry(num);
+                        string type = AutoDetectType(num);
                         string prefix = num.Length >= 5 ? num.Substring(0, 5) : num;
                         cmd.Parameters["@n"].Value = num;
                         cmd.Parameters["@c"].Value = country;
+                        cmd.Parameters["@t"].Value = type;
+                        cmd.Parameters["@ch"].Value = channel;
                         cmd.Parameters["@p"].Value = prefix;
                         cmd.Parameters["@s"].Value = source;
                         int rows = cmd.ExecuteNonQuery();
@@ -399,9 +549,12 @@ namespace DataCenter
 
             Enabled = false;
             string source = Path.GetFileNameWithoutExtension(dlg.FileName);
-            int inserted = ImportNumbers(numbers, source);
+            string channel = cbChannel.Text;
+            if (string.IsNullOrEmpty(channel)) channel = "短信";
+            int inserted = ImportNumbers(numbers, source, channel);
             Enabled = true;
             LoadCountries();
+            LoadTypes();
             RefreshAll();
             MessageBox.Show(string.Format("导入完成: {0:n0} 条 (共读取 {1:n0} 行)", inserted, numbers.Count), "完成");
         }
@@ -537,8 +690,11 @@ namespace DataCenter
                     return;
                 }
 
-                int inserted = ImportNumbers(numbers, "粘贴导入");
+                string ch = cbChannel.Text;
+                if (string.IsNullOrEmpty(ch)) ch = "短信";
+                int inserted = ImportNumbers(numbers, "粘贴导入", ch);
                 LoadCountries();
+                LoadTypes();
                 RefreshAll();
                 MessageBox.Show(string.Format("导入完成: {0:n0} 条 (共 {1:n0} 行)", inserted, numbers.Count), "完成");
             }
@@ -554,11 +710,14 @@ namespace DataCenter
         void OnSearch(object sender, EventArgs e)
         {
             string country = cbCountry.SelectedIndex > 0 ? cbCountry.SelectedItem.ToString() : "";
+            string type = cbType.SelectedIndex > 0 ? cbType.SelectedItem.ToString() : "";
             string keyword = tbSearch.Text.Trim();
 
             var sql = new StringBuilder("SELECT * FROM numbers WHERE 1=1");
             if (!string.IsNullOrEmpty(country))
                 sql.AppendFormat(" AND country = '{0}'", country.Replace("'", "''"));
+            if (!string.IsNullOrEmpty(type))
+                sql.AppendFormat(" AND type = '{0}'", type.Replace("'", "''"));
             if (!string.IsNullOrEmpty(keyword))
                 sql.AppendFormat(" AND (number LIKE '%{0}%' OR prefix LIKE '{0}%')", keyword.Replace("'", "''"));
             sql.Append(" ORDER BY id DESC LIMIT 50000");
@@ -584,9 +743,11 @@ namespace DataCenter
                 case 0: e.Value = row["id"]; break;
                 case 1: e.Value = row["number"]; break;
                 case 2: e.Value = row["country"]; break;
-                case 3: e.Value = row["prefix"]; break;
-                case 4: e.Value = row["source"]; break;
-                case 5: e.Value = row["added"]; break;
+                case 3: e.Value = row["type"]; break;
+                case 4: e.Value = row["channel"]; break;
+                case 5: e.Value = row["prefix"]; break;
+                case 6: e.Value = row["source"]; break;
+                case 7: e.Value = row["added"]; break;
             }
         }
 
@@ -596,6 +757,7 @@ namespace DataCenter
         void RefreshAll()
         {
             RefreshStats();
+            RefreshSummary();
             dtCache = QuerySQL("SELECT * FROM numbers ORDER BY id DESC LIMIT 50000");
             grid.RowCount = dtCache.Rows.Count;
             grid.Refresh();
@@ -663,6 +825,7 @@ namespace DataCenter
                     }
                 }
                 LoadCountries();
+                LoadTypes();
                 RefreshAll();
             }
             catch (Exception ex)
@@ -679,7 +842,118 @@ namespace DataCenter
             if (MessageBox.Show("确认清空全部数据? 此操作不可恢复!", "危险操作", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             ExecSQL("DELETE FROM numbers");
             LoadCountries();
+            LoadTypes();
             RefreshAll();
+        }
+
+        // ═══════════════════════════════════════════════
+        // 批量改类型
+        // ═══════════════════════════════════════════════
+        void OnBatchSetType(object sender, EventArgs e)
+        {
+            if (grid.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("请先选中数据行", "提示");
+                return;
+            }
+
+            var dlg = new Form
+            {
+                Text = "选择新类型", Size = new Size(220, 140),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false, MinimizeBox = false
+            };
+            var cb = new ComboBox
+            {
+                Left = 20, Top = 20, Width = 160,
+                DropDownStyle = ComboBoxStyle.DropDown,
+                Text = "手机"
+            };
+            cb.Items.AddRange(new object[] { "手机", "固话", "国际", "其他" });
+            dlg.Controls.Add(cb);
+            var ok = new Button { Text = "确定", Left = 50, Top = 60, Width = 80 };
+            ok.Click += (s2, e2) => dlg.DialogResult = DialogResult.OK;
+            dlg.Controls.Add(ok);
+            dlg.AcceptButton = ok;
+
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+            string newType = cb.Text;
+            if (string.IsNullOrEmpty(newType)) return;
+
+            try
+            {
+                foreach (DataGridViewRow row in grid.SelectedRows)
+                {
+                    if (row.Index < dtCache.Rows.Count)
+                    {
+                        long id = Convert.ToInt64(dtCache.Rows[row.Index]["id"]);
+                        ExecSQL(string.Format("UPDATE numbers SET type = '{0}' WHERE id = {1}", newType.Replace("'", "''"), id));
+                    }
+                }
+                LoadTypes();
+                RefreshAll();
+                MessageBox.Show(string.Format("已更新 {0} 条类型为 {1}", grid.SelectedRows.Count, newType), "完成");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("批量修改失败: " + ex.Message, "错误");
+            }
+        }
+
+        // ═══════════════════════════════════════════════
+        // 批量改渠道
+        // ═══════════════════════════════════════════════
+        void OnBatchSetChannel(object sender, EventArgs e)
+        {
+            if (grid.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("请先选中数据行", "提示");
+                return;
+            }
+
+            var dlg = new Form
+            {
+                Text = "选择新渠道", Size = new Size(220, 140),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false, MinimizeBox = false
+            };
+            var cb = new ComboBox
+            {
+                Left = 20, Top = 20, Width = 160,
+                DropDownStyle = ComboBoxStyle.DropDown,
+                Text = "短信"
+            };
+            cb.Items.AddRange(new object[] { "短信", "WS", "TG", "RCS", "iOS群发专用" });
+            dlg.Controls.Add(cb);
+            var ok = new Button { Text = "确定", Left = 50, Top = 60, Width = 80 };
+            ok.Click += (s2, e2) => dlg.DialogResult = DialogResult.OK;
+            dlg.Controls.Add(ok);
+            dlg.AcceptButton = ok;
+
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+            string newChannel = cb.Text;
+            if (string.IsNullOrEmpty(newChannel)) return;
+
+            try
+            {
+                foreach (DataGridViewRow row in grid.SelectedRows)
+                {
+                    if (row.Index < dtCache.Rows.Count)
+                    {
+                        long id = Convert.ToInt64(dtCache.Rows[row.Index]["id"]);
+                        ExecSQL(string.Format("UPDATE numbers SET channel = '{0}' WHERE id = {1}", newChannel.Replace("'", "''"), id));
+                    }
+                }
+                LoadTypes();
+                RefreshAll();
+                MessageBox.Show(string.Format("已更新 {0} 条渠道为 {1}", grid.SelectedRows.Count, newChannel), "完成");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("批量修改失败: " + ex.Message, "错误");
+            }
         }
 
         // ═══════════════════════════════════════════════
